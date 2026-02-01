@@ -1,111 +1,159 @@
 #include <iostream>
 #include <string>
+#include <cctype>
+#include <limits>
+
 using namespace std;
 
-// ===============================
+// ===================================================
 // STRUCT DATA BARANG
-// ===============================
-// Struct digunakan untuk menyimpan data barang secara terkelompok
+// Digunakan untuk menyimpan data lengkap setiap barang
+// ===================================================
 struct Barang {
-    int kode;
-    string nama;
-    int stok;
-    int harga;
+    int kode;        // Kode unik barang
+    string nama;     // Nama barang (boleh mengandung spasi)
+    int stok;        // Jumlah stok
+    int harga;       // Harga barang
 };
 
-// ===============================
+// ===================================================
 // ARRAY DATA BARANG
-// ===============================
-// Array digunakan untuk menyimpan kumpulan barang
+// ===================================================
 Barang barang[100];
 int jumlahBarang = 0;
 
-// ===============================
+// ===================================================
 // STACK TRANSAKSI (LIFO)
-// ===============================
-// Stack digunakan untuk menyimpan riwayat transaksi pembelian
+// Menyimpan riwayat transaksi pembelian
+// ===================================================
 string stackTransaksi[100];
 int top = -1;
 
-// ===============================
+// ===================================================
 // QUEUE PEMBELIAN (FIFO)
-// ===============================
-// Queue digunakan untuk antrian pembelian
+// Menyimpan antrian pembelian
+// ===================================================
 string queuePembelian[100];
 int front = 0;
 int rear = -1;
 
-// ===============================
-// VARIABEL LAIN
-// ===============================
+// ===================================================
+// VARIABEL PENDUKUNG
+// ===================================================
 int stokMinimum = 5;
 int totalPenjualan = 0;
 
-// ===============================
-// FUNGSI MENU
-// ===============================
+// ===================================================
+// FUNGSI MEMBERSIHKAN BUFFER INPUT
+// ===================================================
+void clearInput() {
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
+// ===================================================
+// FUNGSI NORMALISASI STRING (LOWERCASE)
+// ===================================================
+string toLowerCase(string teks) {
+    for (char &c : teks) {
+        c = tolower(c);
+    }
+    return teks;
+}
+
+// ===================================================
+// FUNGSI TRIM SPASI AWAL & AKHIR
+// ===================================================
+string trim(string teks) {
+    while (!teks.empty() && teks.front() == ' ')
+        teks.erase(teks.begin());
+    while (!teks.empty() && teks.back() == ' ')
+        teks.pop_back();
+    return teks;
+}
+
+// ===================================================
+// FUNGSI MENAMPILKAN MENU
+// ===================================================
 void tampilMenu() {
     cout << "\n=== TOKOKU INVENTORY MANAGER ===\n";
     cout << "1. Tambah Barang\n";
     cout << "2. Lihat Semua Barang\n";
-    cout << "3. Cari Barang\n";
+    cout << "3. Cari Barang (Kode / Nama)\n";
     cout << "4. Transaksi Pembelian\n";
-    cout << "5. Riwayat Transaksi\n";
-    cout << "6. Proses Antrian\n";
+    cout << "5. Riwayat Transaksi (Stack)\n";
+    cout << "6. Proses Antrian Pembelian (Queue)\n";
     cout << "7. Cek Stok Menipis\n";
     cout << "8. Laporan Penjualan\n";
     cout << "0. Keluar\n";
     cout << "Pilih menu: ";
 }
 
-// ===============================
+// ===================================================
 // PROGRAM UTAMA
-// ===============================
+// ===================================================
 int main() {
     int pilihan;
 
     do {
         tampilMenu();
         cin >> pilihan;
+        clearInput(); // pastikan buffer bersih
 
         switch (pilihan) {
 
-        case 1: // Tambah Barang
+        // ===============================
+        case 1: { // Tambah Barang
+            if (jumlahBarang >= 100) {
+                cout << "Kapasitas barang penuh.\n";
+                break;
+            }
+
             cout << "Kode Barang  : ";
             cin >> barang[jumlahBarang].kode;
+            clearInput();
+
             cout << "Nama Barang  : ";
-            cin >> barang[jumlahBarang].nama;
+            getline(cin, barang[jumlahBarang].nama); // AMAN SPASI
+
             cout << "Stok         : ";
             cin >> barang[jumlahBarang].stok;
+
             cout << "Harga        : ";
             cin >> barang[jumlahBarang].harga;
+            clearInput();
 
             jumlahBarang++;
-            cout << "Barang berhasil ditambahkan\n";
+            cout << "Barang berhasil ditambahkan.\n";
             break;
+        }
 
-        case 2: // Lihat Barang
-            for (int i = 0; i < jumlahBarang; i++) {
-                cout << barang[i].kode << " | "
-                     << barang[i].nama << " | "
-                     << barang[i].stok << " | "
-                     << barang[i].harga << endl;
+        // ===============================
+        case 2: { // Lihat Semua Barang
+            if (jumlahBarang == 0) {
+                cout << "Data barang kosong.\n";
+            } else {
+                for (int i = 0; i < jumlahBarang; i++) {
+                    cout << barang[i].kode << " | "
+                         << barang[i].nama << " | "
+                         << barang[i].stok << " | "
+                         << barang[i].harga << endl;
+                }
             }
             break;
+        }
 
-        case 3: { 
-            // ===============================
-            // PENCARIAN BARANG BERDASARKAN KODE / NAMA
-            // ===============================
-            string inputCari;
+        // ===============================
+        case 3: { // Cari Barang (Kode / Nama)
+            string input;
             bool ditemukan = false;
 
             cout << "Masukkan kode atau nama barang: ";
-            cin >> inputCari;
+            getline(cin, input);
 
-            // Cek apakah input berupa angka (kode barang)
+            input = trim(toLowerCase(input));
+
             bool isAngka = true;
-            for (char c : inputCari) {
+            for (char c : input) {
                 if (!isdigit(c)) {
                     isAngka = false;
                     break;
@@ -113,27 +161,25 @@ int main() {
             }
 
             for (int i = 0; i < jumlahBarang; i++) {
-
-                // Jika input angka → cari berdasarkan kode
                 if (isAngka) {
-                    int kodeCari = stoi(inputCari);
+                    int kodeCari = stoi(input);
                     if (barang[i].kode == kodeCari) {
                         cout << "Ditemukan: "
-                            << barang[i].kode << " | "
-                            << barang[i].nama << " | "
-                            << barang[i].stok << " | "
-                            << barang[i].harga << endl;
+                             << barang[i].kode << " | "
+                             << barang[i].nama << " | "
+                             << barang[i].stok << " | "
+                             << barang[i].harga << endl;
                         ditemukan = true;
+                        break;
                     }
-                }
-                // Jika input teks → cari berdasarkan nama
-                else {
-                    if (barang[i].nama == inputCari) {
+                } else {
+                    string namaBarang = trim(toLowerCase(barang[i].nama));
+                    if (namaBarang.find(input) != string::npos) {
                         cout << "Ditemukan: "
-                            << barang[i].kode << " | "
-                            << barang[i].nama << " | "
-                            << barang[i].stok << " | "
-                            << barang[i].harga << endl;
+                             << barang[i].kode << " | "
+                             << barang[i].nama << " | "
+                             << barang[i].stok << " | "
+                             << barang[i].harga << endl;
                         ditemukan = true;
                     }
                 }
@@ -142,63 +188,99 @@ int main() {
             if (!ditemukan) {
                 cout << "Barang tidak ditemukan.\n";
             }
-
             break;
         }
 
-
+        // ===============================
         case 4: { // Transaksi Pembelian
             int kodeBeli, jumlahBeli;
-            cout << "Kode Barang: ";
+            bool ditemukan = false;
+
+            cout << "Kode Barang  : ";
             cin >> kodeBeli;
-            cout << "Jumlah Beli: ";
+
+            cout << "Jumlah Beli  : ";
             cin >> jumlahBeli;
+            clearInput();
 
             for (int i = 0; i < jumlahBarang; i++) {
-                if (barang[i].kode == kodeBeli && barang[i].stok >= jumlahBeli) {
-                    barang[i].stok -= jumlahBeli;
-                    totalPenjualan += barang[i].harga * jumlahBeli;
+                if (barang[i].kode == kodeBeli) {
+                    ditemukan = true;
 
-                    // Push ke stack
-                    top++;
-                    stackTransaksi[top] = barang[i].nama;
+                    if (jumlahBeli > 0 && barang[i].stok >= jumlahBeli) {
+                        barang[i].stok -= jumlahBeli;
+                        int total = barang[i].harga * jumlahBeli;
+                        totalPenjualan += total;
 
-                    // Enqueue ke queue
-                    rear++;
-                    queuePembelian[rear] = barang[i].nama;
+                        // Stack (LIFO)
+                        if (top < 99)
+                            stackTransaksi[++top] = barang[i].nama;
 
-                    cout << "Transaksi berhasil\n";
+                        // Queue (FIFO)
+                        if (rear < 99)
+                            queuePembelian[++rear] = barang[i].nama;
+
+                        cout << "Transaksi berhasil. Total: " << total << endl;
+                    } else {
+                        cout << "Stok tidak cukup atau jumlah tidak valid.\n";
+                    }
+                    break;
+                }
+            }
+
+            if (!ditemukan) {
+                cout << "Kode barang tidak ditemukan.\n";
+            }
+            break;
+        }
+
+        // ===============================
+        case 5: { // Riwayat Transaksi (Stack)
+            if (top < 0) {
+                cout << "Belum ada transaksi.\n";
+            } else {
+                cout << "Riwayat Transaksi (LIFO):\n";
+                for (int i = top; i >= 0; i--) {
+                    cout << stackTransaksi[i] << endl;
                 }
             }
             break;
         }
 
-        case 5: // Riwayat Transaksi
-            for (int i = top; i >= 0; i--) {
-                cout << stackTransaksi[i] << endl;
-            }
-            break;
-
-        case 6: // Proses Antrian
-            if (front <= rear) {
+        // ===============================
+        case 6: { // Proses Antrian (Queue)
+            if (front > rear) {
+                cout << "Antrian kosong.\n";
+            } else {
                 cout << "Diproses: " << queuePembelian[front] << endl;
                 front++;
-            } else {
-                cout << "Antrian kosong\n";
             }
             break;
+        }
 
-        case 7: // Stok Menipis
+        // ===============================
+        case 7: { // Cek Stok Menipis
+            bool ada = false;
             for (int i = 0; i < jumlahBarang; i++) {
                 if (barang[i].stok <= stokMinimum) {
-                    cout << barang[i].nama << " stok menipis\n";
+                    cout << barang[i].nama
+                         << " stok menipis (" << barang[i].stok << ")\n";
+                    ada = true;
                 }
             }
+            if (!ada) {
+                cout << "Tidak ada stok menipis.\n";
+            }
             break;
+        }
 
-        case 8: // Laporan
-            cout << "Total Penjualan: " << totalPenjualan << endl;
+        // ===============================
+        case 8: { // Laporan Penjualan
+            cout << "Total Penjualan  : " << totalPenjualan << endl;
+            cout << "Jumlah Transaksi : " << (top + 1) << endl;
             break;
+        }
+
         }
 
     } while (pilihan != 0);
