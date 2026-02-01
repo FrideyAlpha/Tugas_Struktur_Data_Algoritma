@@ -1,0 +1,49 @@
+flowchart TD
+    A([Mulai Program])
+    B[Inisialisasi Data\nArray Struct Stack Queue]
+    C[Tampilkan Menu]
+    D{Pilihan Menu}
+
+    E[Tambah Data Barang\nSimpan ke Array dan Struct]
+    F[Tampilkan Semua Data Barang]
+
+    G[Input Kode atau Nama Barang]
+    H{Input Angka}
+    I[Cari Berdasarkan Kode\nPerulangan Array]
+    J[Cari Berdasarkan Nama\nPerulangan Array]
+
+    K[Input Kode dan Jumlah Beli]
+    L{Stok Cukup}
+    M[Kurangi Stok Barang]
+    N[Simpan Transaksi ke Stack]
+    O[Masukkan Antrian ke Queue]
+
+    P[Tampilkan Riwayat Transaksi\nDari Stack]
+
+    Q{Antrian Kosong}
+    R[Proses Antrian Pembelian]
+
+    S[Cek Stok Menipis]
+
+    T[Tampilkan Laporan Penjualan]
+
+    U{Keluar Program}
+    V([Selesai])
+
+    A --> B --> C --> D
+
+    D -->|1| E --> C
+    D -->|2| F --> C
+    D -->|3| G --> H
+    H -->|Ya| I --> C
+    H -->|Tidak| J --> C
+    D -->|4| K --> L
+    L -->|Ya| M --> N --> O --> C
+    L -->|Tidak| C
+    D -->|5| P --> C
+    D -->|6| Q
+    Q -->|Tidak| R --> C
+    Q -->|Ya| C
+    D -->|7| S --> C
+    D -->|8| T --> C
+    D -->|0| V
